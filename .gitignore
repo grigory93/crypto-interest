@@ -1,0 +1,17 @@
+# History files
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# Misc
+*.key
+*lesson.html
+*lesson_files/
+rsconnect/
+
+# DS Store
+.DS_Store
+
+# Log Files
+logfile*.txt
