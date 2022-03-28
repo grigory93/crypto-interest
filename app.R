@@ -174,8 +174,7 @@ ui <- fluidPage(
       ),
       column(
         4,
-        uiOutput("referralRef"),
-        actionLink("linkToAboutPlatforms", "Link to Panel A")
+        uiOutput("referralRef")
       )),
       fluidRow(#div(style="display: inline-block;vertical-align:top; width: 30%;", uiOutput("referralRef")),
         column(
@@ -203,7 +202,8 @@ ui <- fluidPage(
         max = 1.,
         value = 1.,
         step = 0.1
-      )
+      ),
+      actionLink("linkToAboutPlatforms", "About Crypto Savings Accounts")
     ),
     
     # Show a plot of the generated distribution
@@ -702,7 +702,7 @@ server <- function(input, output, session) {
     cur = input$ticker
     
     ref = currencies[currency == cur,]
-    website = ref$webiste
+    website = ref$website
     network = ref$network
     text = paste0("Explore ", network, " (", cur, ")")
     return(tagList(h6(em(
