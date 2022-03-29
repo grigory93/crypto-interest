@@ -162,20 +162,22 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       # div(style="display: inline-block;vertical-align:top; width: 70%;",
-      fluidRow(column(
-        8,
-        selectInput(
-          inputId = "platform",
-          label = h5("Choose Platform:"),
-          choices = names(g_crypto_platforms),
-          selected = "BlockFi",
-          multiple = FALSE
-        )
-      ),
-      column(
-        4,
-        uiOutput("referralRef")
-      )),
+      fluidRow(
+        column(
+          8,
+          selectInput(
+            inputId = "platform",
+            label = h5("Choose Platform:"),
+            choices = names(g_crypto_platforms),
+            selected = "BlockFi",
+            multiple = FALSE
+          )
+        ),
+        column(
+          4,
+          uiOutput("whitespace1"),
+          uiOutput("referralRef")
+        )),
       fluidRow(#div(style="display: inline-block;vertical-align:top; width: 30%;", uiOutput("referralRef")),
         column(
           8,
@@ -187,7 +189,11 @@ ui <- fluidPage(
             multiple = FALSE
           )
         ),
-        column(4, uiOutput("currencyRef"))),
+        column(
+          4, 
+          uiOutput("whitespace2"),
+          uiOutput("currencyRef")
+        )),
       sliderInput(
         inputId = "months",
         label = h5("Investment Term (months):"),
@@ -377,6 +383,13 @@ server <- function(input, output, session) {
     shinyjs::html("maxInvestmentText",
                   paste0(label_prefix, input$ticker, "):"))
   })
+  
+  
+  output$whitespace1 <- renderUI({HTML('<br/>')})
+    
+  
+  
+  output$whitespace2 <- renderUI({HTML('<br/>')})
   
   
   output$disclaimersHeader <-
