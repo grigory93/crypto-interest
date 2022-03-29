@@ -146,6 +146,31 @@ getTableauPalette <- function(count, style = 'regular') {
 }
 
 
+makeCurrencyNetwork <- function(cur) {
+  network = currencies[currency == cur,]$network
+  return(paste0(network, " (", cur, ")"))
+}
+
+
+makeAPYReturnForCurrency <- function(cur, amount, months) {
+  df = data.table(platform = character(0),
+                  cat = character(0),
+                  value = numeric(0))
+  for (pltf in unique(platform_rates[currency == cur,]$platform)) {
+    fee = platform_penalties[platform == pltf & currency == cur, fee]
+    ret = computeReturn(amount, pltf, cur, months) - amount - fee
+    apy = computeReturn(amount, pltf, cur, months, returnApy = TRUE)
+    df = rbind(df, data.frame(
+      platform = pltf,
+      cat = c('Earnings', 'APY'),
+      value = c(ret, apy)
+    ))
+  }
+  
+  return(df)
+}
+
+
 # Define UI for application that draws a histogram
 ui <- fluidPage(
   shinyjs::useShinyjs(),
@@ -232,7 +257,24 @@ ui <- fluidPage(
           title = "Compare Returns\nby Platforms",
           value = "compareReturns",
           icon = icon("stats", class = "about-icon", lib = "glyphicon"),
-          plotOutput("compareReturnsPlot")
+          tabsetPanel(
+            id = "compare_returns_tabset",
+            tabPanel(
+              title = "Compare APY's and Returns",
+              icon = icon("equalizer", class = "about-icon", lib = "glyphicon"),
+              plotOutput("compareAPYsAndReturnsPlot")
+            ),
+            tabPanel(
+              title = "Compare APY's",
+              icon = icon("credit-card", class = "about-icon", lib = "glyphicon"),
+              plotOutput("compareAPYsPlot")
+            ),
+            tabPanel(
+              title = "Compare Returns",
+              icon = icon("piggy-bank", class = "about-icon", lib = "glyphicon"),
+              plotOutput("compareReturnsPlot")
+            )
+          )
         ),
         tabPanel(
           title = "Compare Returns\nby Coins",
@@ -476,10 +518,7 @@ server <- function(input, output, session) {
   output$currencyRefsHeader <- renderText({
     req(input$ticker)
     cur = input$ticker
-    
-    network = currencies[currency == cur,]$network
-    
-    paste0(network, " (", cur, ")")
+    makeCurrencyNetwork(cur)
   })
   
   
@@ -493,10 +532,7 @@ server <- function(input, output, session) {
   output$resoureCoinTabPanelTitle = renderText({
     req(input$ticker)
     cur = input$ticker
-    
-    refs = currencies[currency == cur,]
-    network = refs$network
-    paste0(network, " (", cur, ")")
+    makeCurrencyNetwork(cur)
   })
   
   output$platformAbout <- renderText({
@@ -610,7 +646,7 @@ server <- function(input, output, session) {
     
     DT::datatable(
       data.frame(c(desc, whitepaper_url, website_url)),
-      # caption = paste0(network, " (", cur, ")"),
+      # caption = makeCurrencyNetwork(cur),
       options = c(g_DT_options,  list(dom = 't', bSort = FALSE)),
       rownames = FALSE,
       colnames = "",
@@ -689,7 +725,7 @@ server <- function(input, output, session) {
   output$earnCryptoData <- DT::renderDataTable({
     DT::datatable(
       g_crypto_earn_data,
-      # caption = paste0(network, " (", cur, ")"),
+      # caption = makeCurrencyNetwork(cur),
       options = c(g_DT_options,  list(dom = 't', bSort = FALSE)),
       rownames = FALSE,
       colnames = "",
@@ -854,38 +890,21 @@ server <- function(input, output, session) {
       theme_tufte(ticks = FALSE, base_size = 16) +
       theme(
         legend.position = "right",
-        plot.caption = element_text(
-          color = "black",
-          face = "italic",
-          size = 10
-        )
+        plot.caption = element_text(color = "black",face = "italic",size = 10)
       )
     
     return(p)
   })
   
   
-  output$compareReturnsPlot <- renderPlot({
+  output$compareAPYsAndReturnsPlot <- renderPlot({
     req(input$ticker, input$months, input$upperRange)
     cur = input$ticker
-    network = currencies[currency == cur,]$network
-    cur_network = paste0(network, ' (', cur, ')')
+    cur_network = makeCurrencyNetwork(cur)
     months = input$months
     amount = input$upperRange
     
-    df = data.frame(platform = character(0),
-                    cat = character(0),
-                    value = numeric(0))
-    for (pltf in unique(platform_rates[currency == cur,]$platform)) {
-      fee = platform_penalties[platform == pltf & currency == cur, fee]
-      ret = computeReturn(amount, pltf, cur, months) - amount - fee
-      apy = computeReturn(amount, pltf, cur, months, returnApy = TRUE)
-      df = rbind(df, data.frame(
-        platform = pltf,
-        cat = c('Earnings', 'APY'),
-        value = c(ret, apy)
-      ))
-    }
+    df = makeAPYReturnForCurrency(cur, amount, months)
     
     caption_notes = makeDisclaimers(cur, NA, NA, NA)
     caption_text = paste(caption_notes, collapse = '\n')
@@ -898,15 +917,7 @@ server <- function(input, output, session) {
       )))) +
       labs(
         title = paste(cur_network, "Compound Returns¹ and APY's by Platform"),
-        subtitle = paste0(
-          "Interest earned on ",
-          amount,
-          " ",
-          cur,
-          " after ",
-          months,
-          " months"
-        ),
+        subtitle = paste("Interest earned on",amount,cur,"after",months,"months"),
         x = NULL,
         y = NULL,
         caption = caption_text
@@ -914,11 +925,78 @@ server <- function(input, output, session) {
       theme_tufte(ticks = FALSE, base_size = 16) +
       theme(
         legend.position = "none",
-        plot.caption = element_text(
-          color = "black",
-          face = "italic",
-          size = 10
-        )
+        plot.caption = element_text(color = "black", face = "italic", size = 10)
+      )
+    
+    return(p)
+  })
+  
+  output$compareAPYsPlot <- renderPlot({
+    req(input$ticker, input$months, input$upperRange)
+    cur = input$ticker
+    cur_network = makeCurrencyNetwork(cur)
+    months = input$months
+    amount = input$upperRange
+    
+    df = makeAPYReturnForCurrency(cur, amount, months)
+    df = df[cat == "APY" ,]
+    
+    caption_notes = makeDisclaimers(cur, NA, NA, NA)
+    caption_text = paste(caption_notes, collapse = '\n')
+    
+    p = ggplot(data = df, aes(platform, value, fill = platform)) +
+      geom_bar(stat = 'identity') +
+      scale_y_continuous(labels = percent) +
+      scale_fill_manual(palette = tableau_color_pal(palette = getTableauPalette(length(
+        unique(df$platform)
+      )))) +
+      labs(
+        title = paste(cur_network, "Compound APY's by Platform"),
+        subtitle = paste("Earnings on",amount,cur,"after",months,"months"),
+        x = NULL,
+        y = "APY",
+        caption = caption_text
+      ) +
+      theme_tufte(ticks = FALSE, base_size = 16) +
+      theme(
+        legend.position = "none",
+        plot.caption = element_text(color = "black", face = "italic", size = 10)
+      )
+    
+    return(p)
+  })
+  
+  
+  output$compareReturnsPlot <- renderPlot({
+    req(input$ticker, input$months, input$upperRange)
+    cur = input$ticker
+    cur_network = makeCurrencyNetwork(cur)
+    months = input$months
+    amount = input$upperRange
+    
+    df = makeAPYReturnForCurrency(cur, amount, months)
+    df = df[cat == "Earnings" ,]
+    
+    caption_notes = makeDisclaimers(cur, NA, NA, NA)
+    caption_text = paste(caption_notes, collapse = '\n')
+    
+    p = ggplot(data = df, aes(platform, value, fill = platform)) +
+      geom_bar(stat = 'identity') +
+      #scale_y_continuous(labels = percent) +
+      scale_fill_manual(palette = tableau_color_pal(palette = getTableauPalette(length(
+        unique(df$platform)
+      )))) +
+      labs(
+        title = paste(cur_network, "Compound APY's by Platform"),
+        subtitle = paste("APY promised on",amount,cur),
+        x = NULL,
+        y = paste0("Earnings (",cur,")"),
+        caption = caption_text
+      ) +
+      theme_tufte(ticks = FALSE, base_size = 16) +
+      theme(
+        legend.position = "none",
+        plot.caption = element_text(color = "black", face = "italic", size = 10)
       )
     
     return(p)
