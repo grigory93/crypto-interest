@@ -381,11 +381,11 @@ getBlockFiData <- function(platform = "BlockFi") {
   
   blockfi_data = transpose(data.table(
     make.names = c("currency", "amount_upper", "apy", "fee", "limit", "one_free", "note"),
-    BTC1 =        c('BTC', 0.1,  4.5,  0.00075, 100, TRUE, NA),
+    BTC1 =        c('BTC', 0.1,  4.0,  0.00075, 100, TRUE, NA),
     BTC2 =        c('BTC', 0.35, 1.,   0.00075, 100, TRUE, NA),
     BTC3 =        c('BTC', Inf,  .1,   0.00075, 100, TRUE, NA),
     
-    ETH1 =        c('ETH', 1.5,  5.,   0.015,   5000, FALSE, NA),
+    ETH1 =        c('ETH', 1.5,  4.,   0.015,   5000, FALSE, NA),
     ETH2 =        c('ETH', 5.,   1.5,  0.015,   5000, FALSE, NA),
     ETH3 =        c('ETH', Inf,  .25,  0.015,   5000, FALSE, NA),
     
@@ -416,8 +416,8 @@ getBlockFiData <- function(platform = "BlockFi") {
   changeCols = c("amount_upper", "apy", "fee", "limit")
   blockfi_data[, (changeCols) := lapply(.SD, as.numeric), .SDcols = changeCols]
   blockfi_data[, one_free := as.logical(one_free)]
-  blockfi_stable_rates = data.table(amount_upper = c(20000, 10000000, Inf),
-                                    apy = c(8., 7., 5.5),
+  blockfi_stable_rates = data.table(amount_upper = c(20000, 5000000, Inf),
+                                    apy = c(7.25, 6., 4.5),
                                     fee = 50.,
                                     limit = 1000000.,
                                     one_free = TRUE,
@@ -555,20 +555,20 @@ getGeminiData <- function(platform = "Gemini") {
     make.names = c("currency", "amount_upper", "apy"),
     BTC =        c('BTC', Inf, 1.01),
     ETH =        c('ETH', Inf, 1.26),
-    BCH =        c('BCH', Inf, 5.12 ),
+    # BCH =        c('BCH', Inf, 5.33 ),
     LINK =       c('LINK', Inf, .5),
     PAXG =       c('PAXG', Inf, .5),
     UNI =        c('UNI', Inf, 1.01),
     BAT =        c('BAT', Inf, 1.01),
-    LUNA =       c('LUNA', Inf, 4.52),
+    LUNA =       c('LUNA', Inf, 6.11),
     SOL =        c('SOL', Inf, 4.29),
     DOGE =       c('DOGE', Inf, 1.01),
     LTC =        c('LTC', Inf, 1.51),
     XTZ =        c('XTZ', Inf, 2.05),
-    GUSD =       c('GUSD', Inf, 8.05),
+    GUSD =       c('GUSD', Inf, 6.9),
     DAI =        c('DAI', Inf, 6.43),
-    UST =        c('UST', Inf, 7.99),
-    USDC =       c('USDC', Inf, 7.99)
+    UST =        c('UST', Inf, 6.8),
+    USDC =       c('USDC', Inf, 6.36)
   ), make.names = "make.names")
   changeCols = c("amount_upper", "apy")
   gemini_data[, (changeCols):= lapply(.SD, as.numeric), .SDcols = changeCols]

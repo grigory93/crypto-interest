@@ -98,7 +98,7 @@ computeReturn <- function(amt, pltf, cur, months, returnApy = FALSE) {
     }
     
     if (returnApy)
-      result = ifelse(amt_current > 0, tier$apy, result)
+      result = ifelse(amt_current > 0, tier$apy, result)/100
     else
       result = result + computeCompundInterest(amt_current, tier$apy, months)
   }
@@ -254,7 +254,7 @@ ui <- fluidPage(
           DT::dataTableOutput("limitsFeesData")
         ),
         tabPanel(
-          title = "Compare Returns\nby Platforms",
+          title = "Compare Returns by Platforms",
           value = "compareReturns",
           icon = icon("stats", class = "about-icon", lib = "glyphicon"),
           tabsetPanel(
@@ -277,7 +277,7 @@ ui <- fluidPage(
           )
         ),
         tabPanel(
-          title = "Compare Returns\nby Coins",
+          title = "Compare APY's by Assets",
           value = "compareReturnsCoins",
           icon = icon("stats", class = "about-icon", lib = "glyphicon"),
           plotOutput("compareReturnsCoinsPlot")
@@ -820,7 +820,7 @@ server <- function(input, output, session) {
     x_step = (x_stop - x_start) / x_step_freq
     
     x = seq(x_start, x_stop, x_step)
-    y = sapply(x, computeReturn, pltf, cur, months, FALSE) - x - fee
+    y = sapply(x, computeReturn, pltf, cur, months) - x - fee
 
     r = factor(sapply(x, function(v, bfr)
       bfr[v < amount_upper & v >= amount_lower, ]$apy,
@@ -957,7 +957,7 @@ server <- function(input, output, session) {
         y = "APY",
         caption = caption_text
       ) +
-      theme_tufte(ticks = FALSE, base_size = 16) +
+      theme_tufte(ticks = FALSE, base_size = 18) +
       theme(
         legend.position = "none",
         plot.caption = element_text(color = "black", face = "italic", size = 10)
@@ -993,7 +993,7 @@ server <- function(input, output, session) {
         y = paste0("Earnings (",cur,")"),
         caption = caption_text
       ) +
-      theme_tufte(ticks = FALSE, base_size = 16) +
+      theme_tufte(ticks = FALSE, base_size = 18) +
       theme(
         legend.position = "none",
         plot.caption = element_text(color = "black", face = "italic", size = 10)
@@ -1021,7 +1021,7 @@ server <- function(input, output, session) {
         unique(df$currency)
       )))) +
       labs(
-        title = paste(pltf, "APY's by Coin"),
+        title = paste(pltf, "APY's by Assets"),
         # subtitle = paste0("Interest earned on ",amount," ",cur," after ",months," months"),
         x = NULL,
         y = NULL,
