@@ -16,6 +16,7 @@ library(stringr)
 
 # prepare data
 source('crypto_data_load.R', local = TRUE)
+source('crypto_library.R', local = TRUE)
 
 # DT options
 g_DT_options = list(info = FALSE,
@@ -30,6 +31,11 @@ platform_refs = platform_data[["refs"]]
 currencies = platform_data[["currencies"]]
 about_savings = platform_data[["about"]]
 
+# Crypto API
+currency_asset_data = load_assets()
+currency_asset_data = currency_asset_data[symbol %in% currencies$currency]
+currencies = currency_asset_data [currencies, on=c(symbol="currency_join")]
+currencies[, network := ifelse(is.na(name), network, name)]
 
 makeCurrencyOptions <- function(pltf = NULL) {
   if (is.null(pltf))
@@ -335,6 +341,7 @@ ui <- fluidPage(
               icon = icon("bitcoin", class = "about-icon"),
               #, lib = "glyphicon"),
               h4(textOutput("currencyRefsHeader")),
+              DT::dataTableOutput("currencyData"),
               DT::dataTableOutput("currencyRefs")
             )
           )
@@ -643,15 +650,68 @@ server <- function(input, output, session) {
       refs$website,
       "</a>"
     )
+    explorer_url = paste0(
+      "Blockchain explorer: <a href='",
+      refs$explorer,
+      "' target='_blank'>",
+      refs$explorer,
+      "</a>"
+    )
     
     DT::datatable(
-      data.frame(c(desc, whitepaper_url, website_url)),
+      data.frame(c(desc, whitepaper_url, website_url, explorer_url)),
       # caption = makeCurrencyNetwork(cur),
       options = c(g_DT_options,  list(dom = 't', bSort = FALSE)),
       rownames = FALSE,
       colnames = "",
       escape = FALSE
     )
+    
+  })
+  
+  
+  output$currencyData <- DT::renderDataTable({
+    req(input$ticker)
+    cur = input$ticker
+    
+    refs = currencies[currency == cur,]
+    
+    currency_data = c(
+      rank = refs$rank,
+      supply = refs$supply,
+      maxSupply = refs$maxSupply,
+      marketCapUsd = refs$marketCapUsd,
+      volumeUsd24Hr = refs$volumeUsd24Hr,
+      priceUsd = refs$priceUsd,
+      changePercent24Hr = refs$changePercent24Hr
+    )
+    currency_data = ifelse(is.na(currency_data), 0, currency_data)
+    
+   
+      DT::datatable(
+        data.frame(
+            currency_data[["rank"]],
+            scales::label_number_si(accuracy = 0.1)(currency_data[["supply"]]) ,
+            ifelse(currency_data[["maxSupply"]] > 0, scales::percent(currency_data[["supply"]] / currency_data[["maxSupply"]]), 0.),
+            scales::label_number_si(accuracy = 0.1)(currency_data[["marketCapUsd"]]),
+            scales::label_number_si(accuracy = 0.1)(currency_data[["volumeUsd24Hr"]]),
+            scales::label_number_si(accuracy = 0.01)(currency_data[["priceUsd"]]),
+            scales::percent(currency_data[["changePercent24Hr"]]/100.)
+        ),
+        # caption = makeCurrencyNetwork(cur),
+        options = c(g_DT_options,  list(dom = 't', bSort = FALSE)),
+        rownames = FALSE,
+        colnames = c(
+          "Popularity",
+          "Circulation supply (US$)",
+          "% of total supply",
+          "Market cap (US$)",
+          "Volume 24h (US$)",
+          "Price (US$)",
+          "% Change (24h)"
+        ),
+        escape = FALSE
+      )
     
   })
   
@@ -922,7 +982,7 @@ server <- function(input, output, session) {
         y = NULL,
         caption = caption_text
       ) +
-      theme_tufte(ticks = FALSE, base_size = 16) +
+      theme_tufte(ticks = FALSE, base_size = 18) +
       theme(
         legend.position = "none",
         plot.caption = element_text(color = "black", face = "italic", size = 10)
@@ -987,7 +1047,7 @@ server <- function(input, output, session) {
         unique(df$platform)
       )))) +
       labs(
-        title = paste(cur_network, "Compound APY's by Platform"),
+        title = paste(cur_network, "Compound Returns by Platform"),
         subtitle = paste("APY promised on",amount,cur),
         x = NULL,
         y = paste0("Earnings (",cur,")"),
@@ -1041,9 +1101,6 @@ server <- function(input, output, session) {
     
   })
 }
-
-
-
 
 
 # TODO - image rendering
