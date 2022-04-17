@@ -34,8 +34,12 @@ about_savings = platform_data[["about"]]
 # Crypto API
 currency_asset_data = load_assets()
 currency_asset_data = currency_asset_data[symbol %in% currencies$currency]
-currencies = currency_asset_data [currencies, on=c(symbol="currency_join")]
+currencies = currency_asset_data[currencies, on=c(symbol="currency_join")]
 currencies[, network := ifelse(is.na(name), network, name)]
+
+exchange_data = load_exchanges()
+platform_refs = exchange_data[platform_refs, on="exchangeId"]
+
 
 makeCurrencyOptions <- function(pltf = NULL) {
   if (is.null(pltf))
@@ -333,6 +337,7 @@ ui <- fluidPage(
               icon = icon("cloud", class = "about-icon", lib = "glyphicon"),
               h4(textOutput("platformRefsHeader")),
               p(textOutput("platformAbout")),
+              DT::dataTableOutput("platformData"),
               DT::dataTableOutput("platformRefs")
             ),
             tabPanel(
@@ -519,7 +524,9 @@ server <- function(input, output, session) {
     req(input$platform)
     pltf = input$platform
     
-    paste(pltf, "Platform")
+    refs = platform_refs[platform == pltf,]
+    
+    paste(pltf, "Platform", ifelse(is.na(refs$exchangeId), "", "and Exchange"))
   })
   
   output$currencyRefsHeader <- renderText({
@@ -628,6 +635,37 @@ server <- function(input, output, session) {
   })
   
   
+  output$platformData <- DT::renderDataTable({
+    req(input$platform)
+    pltf = input$platform
+    
+    refs = platform_refs[platform == pltf,]
+    if(is.na(refs$exchangeId))
+      return(NULL)
+    else {
+      DT::datatable(
+        data.frame(
+          refs$rank,
+          scales::percent(refs$percentTotalVolume/100., accuracy = 0.01),
+          scales::label_number_si(accuracy = 0.01)(refs$volumeUsd),
+          refs$tradingPairs
+        ),
+        # caption = makeCurrencyNetwork(cur),
+        options = c(g_DT_options,  list(dom = 't', bSort = FALSE)),
+        rownames = FALSE,
+        colnames = c(
+          "Exchange Rank",
+          "Percent of total volume",
+          "Volume (US$)",
+          "Trading Pairs"
+        ),
+        escape = FALSE
+      )
+    }
+    
+  })
+  
+  
   output$currencyRefs <- DT::renderDataTable({
     req(input$ticker)
     cur = input$ticker
@@ -674,8 +712,7 @@ server <- function(input, output, session) {
     req(input$ticker)
     cur = input$ticker
     
-    refs = currencies[currency == cur,]
-    
+    refs = currencies[currency == cur, ]
     currency_data = c(
       rank = refs$rank,
       supply = refs$supply,
@@ -687,31 +724,34 @@ server <- function(input, output, session) {
     )
     currency_data = ifelse(is.na(currency_data), 0, currency_data)
     
-   
-      DT::datatable(
-        data.frame(
-            currency_data[["rank"]],
-            scales::label_number_si(accuracy = 0.1)(currency_data[["supply"]]) ,
-            ifelse(currency_data[["maxSupply"]] > 0, scales::percent(currency_data[["supply"]] / currency_data[["maxSupply"]]), 0.),
-            scales::label_number_si(accuracy = 0.1)(currency_data[["marketCapUsd"]]),
-            scales::label_number_si(accuracy = 0.1)(currency_data[["volumeUsd24Hr"]]),
-            scales::label_number_si(accuracy = 0.01)(currency_data[["priceUsd"]]),
-            scales::percent(currency_data[["changePercent24Hr"]]/100.)
+    DT::datatable(
+      data.frame(
+        currency_data[["rank"]],
+        scales::label_number_si(accuracy = 0.1)(currency_data[["supply"]]) ,
+        ifelse(
+          currency_data[["maxSupply"]] > 0,
+          scales::percent(currency_data[["supply"]] / currency_data[["maxSupply"]]),
+          0.
         ),
-        # caption = makeCurrencyNetwork(cur),
-        options = c(g_DT_options,  list(dom = 't', bSort = FALSE)),
-        rownames = FALSE,
-        colnames = c(
-          "Popularity",
-          "Circulation supply (US$)",
-          "% of total supply",
-          "Market cap (US$)",
-          "Volume 24h (US$)",
-          "Price (US$)",
-          "% Change (24h)"
-        ),
-        escape = FALSE
-      )
+        scales::label_number_si(accuracy = 0.1)(currency_data[["marketCapUsd"]]),
+        scales::label_number_si(accuracy = 0.1)(currency_data[["volumeUsd24Hr"]]),
+        scales::label_number_si(accuracy = 0.01)(currency_data[["priceUsd"]]),
+        scales::percent(currency_data[["changePercent24Hr"]] / 100.)
+      ),
+      # caption = makeCurrencyNetwork(cur),
+      options = c(g_DT_options,  list(dom = 't', bSort = FALSE)),
+      rownames = FALSE,
+      colnames = c(
+        "Popularity",
+        "Circulation supply (US$)",
+        "% of total supply",
+        "Market cap (US$)",
+        "Volume 24h (US$)",
+        "Price (US$)",
+        "% Change (24h)"
+      ),
+      escape = FALSE
+    )
     
   })
   
