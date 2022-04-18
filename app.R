@@ -149,10 +149,15 @@ getTableauPalette <- function(count, style = 'regular') {
   )
   if (count <= 10)
     index = 1
-  else
+  else if (count <= 20)
     index = 2
-  
-  return(tableau_pals[[index, style]])
+  else 
+    index = 3
+    
+  if (index <= 2)
+    return(tableau_color_pal(palette = tableau_pals[[index, style]]))
+  else
+    return(colorRampPalette(tableau_color_pal(palette = tableau_pals[[2, style]])(20)))
 }
 
 
@@ -264,7 +269,7 @@ ui <- fluidPage(
           DT::dataTableOutput("limitsFeesData")
         ),
         tabPanel(
-          title = "Compare Returns by Platforms",
+          title = "Compare Platforms",
           value = "compareReturns",
           icon = icon("stats", class = "about-icon", lib = "glyphicon"),
           tabsetPanel(
@@ -287,7 +292,7 @@ ui <- fluidPage(
           )
         ),
         tabPanel(
-          title = "Compare APY's by Assets",
+          title = "Compare Assets",
           value = "compareReturnsCoins",
           icon = icon("stats", class = "about-icon", lib = "glyphicon"),
           plotOutput("compareReturnsCoinsPlot")
@@ -1012,9 +1017,7 @@ server <- function(input, output, session) {
     p = ggplot(data = df, aes(platform, value, fill = platform)) +
       geom_bar(stat = 'identity') +
       facet_wrap( ~ cat, scales = "free_y", nrow = 2) +
-      scale_fill_manual(palette = tableau_color_pal(palette = getTableauPalette(length(
-        unique(df$platform)
-      )))) +
+      scale_fill_manual(palette = getTableauPalette(length(unique(df$platform)))) +
       labs(
         title = paste(cur_network, "Compound Returns¹ and APY's by Platform"),
         subtitle = paste("Interest earned on",amount,cur,"after",months,"months"),
@@ -1047,9 +1050,7 @@ server <- function(input, output, session) {
     p = ggplot(data = df, aes(platform, value, fill = platform)) +
       geom_bar(stat = 'identity') +
       scale_y_continuous(labels = percent) +
-      scale_fill_manual(palette = tableau_color_pal(palette = getTableauPalette(length(
-        unique(df$platform)
-      )))) +
+      scale_fill_manual(palette = getTableauPalette(length(unique(df$platform)))) +
       labs(
         title = paste(cur_network, "Compound APY's by Platform"),
         subtitle = paste("Earnings on",amount,cur,"after",months,"months"),
@@ -1083,9 +1084,7 @@ server <- function(input, output, session) {
     p = ggplot(data = df, aes(platform, value, fill = platform)) +
       geom_bar(stat = 'identity') +
       #scale_y_continuous(labels = percent) +
-      scale_fill_manual(palette = tableau_color_pal(palette = getTableauPalette(length(
-        unique(df$platform)
-      )))) +
+      scale_fill_manual(palette = getTableauPalette(length(unique(df$platform)))) +
       labs(
         title = paste(cur_network, "Compound Returns by Platform"),
         subtitle = paste("APY promised on",amount,cur),
@@ -1117,9 +1116,7 @@ server <- function(input, output, session) {
                                 currency)) +
       geom_bar(stat = 'identity') +
       scale_y_continuous(labels = scales::percent) +
-      scale_fill_manual(palette = tableau_color_pal(palette = getTableauPalette(length(
-        unique(df$currency)
-      )))) +
+      scale_fill_manual(palette = getTableauPalette(length(unique(df$currency)))) +
       labs(
         title = paste(pltf, "APY's by Assets"),
         # subtitle = paste0("Interest earned on ",amount," ",cur," after ",months," months"),
