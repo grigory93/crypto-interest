@@ -16,6 +16,7 @@ library(stringr)
 
 # prepare data
 source('crypto_data_load.R', local = TRUE)
+source('crypto_library.R', local = TRUE)
 
 # DT options
 g_DT_options = list(info = FALSE,
@@ -29,6 +30,15 @@ platform_penalties = platform_data[["penalties"]]
 platform_refs = platform_data[["refs"]]
 currencies = platform_data[["currencies"]]
 about_savings = platform_data[["about"]]
+
+# Crypto API
+currency_asset_data = load_assets()
+currency_asset_data = currency_asset_data[symbol %in% currencies$currency]
+currencies = currency_asset_data[currencies, on=c(symbol="currency_join")]
+currencies[, network := ifelse(is.na(name), network, name)]
+
+exchange_data = load_exchanges()
+platform_refs = exchange_data[platform_refs, on="exchangeId"]
 
 
 makeCurrencyOptions <- function(pltf = NULL) {
@@ -98,7 +108,7 @@ computeReturn <- function(amt, pltf, cur, months, returnApy = FALSE) {
     }
     
     if (returnApy)
-      result = ifelse(amt_current > 0, tier$apy, result)
+      result = ifelse(amt_current > 0, tier$apy, result)/100
     else
       result = result + computeCompundInterest(amt_current, tier$apy, months)
   }
@@ -139,10 +149,40 @@ getTableauPalette <- function(count, style = 'regular') {
   )
   if (count <= 10)
     index = 1
-  else
+  else if (count <= 20)
     index = 2
+  else 
+    index = 3
+    
+  if (index <= 2)
+    return(tableau_color_pal(palette = tableau_pals[[index, style]]))
+  else
+    return(colorRampPalette(tableau_color_pal(palette = tableau_pals[[2, style]])(20)))
+}
+
+
+makeCurrencyNetwork <- function(cur) {
+  network = currencies[currency == cur,]$network
+  return(paste0(network, " (", cur, ")"))
+}
+
+
+makeAPYReturnForCurrency <- function(cur, amount, months) {
+  df = data.table(platform = character(0),
+                  cat = character(0),
+                  value = numeric(0))
+  for (pltf in unique(platform_rates[currency == cur,]$platform)) {
+    fee = platform_penalties[platform == pltf & currency == cur, fee]
+    ret = computeReturn(amount, pltf, cur, months) - amount - fee
+    apy = computeReturn(amount, pltf, cur, months, returnApy = TRUE)
+    df = rbind(df, data.frame(
+      platform = pltf,
+      cat = c('Earnings', 'APY'),
+      value = c(ret, apy)
+    ))
+  }
   
-  return(tableau_pals[[index, style]])
+  return(df)
 }
 
 
@@ -162,21 +202,22 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       # div(style="display: inline-block;vertical-align:top; width: 70%;",
-      fluidRow(column(
-        8,
-        selectInput(
-          inputId = "platform",
-          label = h5("Choose Platform:"),
-          choices = names(g_crypto_platforms),
-          selected = "BlockFi",
-          multiple = FALSE
-        )
-      ),
-      column(
-        4,
-        uiOutput("referralRef"),
-        actionLink("linkToAboutPlatforms", "Link to Panel A")
-      )),
+      fluidRow(
+        column(
+          8,
+          selectInput(
+            inputId = "platform",
+            label = h5("Choose Platform:"),
+            choices = names(g_crypto_platforms),
+            selected = "BlockFi",
+            multiple = FALSE
+          )
+        ),
+        column(
+          4,
+          uiOutput("whitespace1"),
+          uiOutput("referralRef")
+        )),
       fluidRow(#div(style="display: inline-block;vertical-align:top; width: 30%;", uiOutput("referralRef")),
         column(
           8,
@@ -188,7 +229,11 @@ ui <- fluidPage(
             multiple = FALSE
           )
         ),
-        column(4, uiOutput("currencyRef"))),
+        column(
+          4, 
+          uiOutput("whitespace2"),
+          uiOutput("currencyRef")
+        )),
       sliderInput(
         inputId = "months",
         label = h5("Investment Term (months):"),
@@ -203,7 +248,8 @@ ui <- fluidPage(
         max = 1.,
         value = 1.,
         step = 0.1
-      )
+      ),
+      actionLink("linkToAboutPlatforms", "About Crypto Savings Accounts")
     ),
     
     # Show a plot of the generated distribution
@@ -223,13 +269,30 @@ ui <- fluidPage(
           DT::dataTableOutput("limitsFeesData")
         ),
         tabPanel(
-          title = "Compare Returns\nby Platforms",
+          title = "Compare Platforms",
           value = "compareReturns",
           icon = icon("stats", class = "about-icon", lib = "glyphicon"),
-          plotOutput("compareReturnsPlot")
+          tabsetPanel(
+            id = "compare_returns_tabset",
+            tabPanel(
+              title = "Compare APY's and Returns",
+              icon = icon("equalizer", class = "about-icon", lib = "glyphicon"),
+              plotOutput("compareAPYsAndReturnsPlot")
+            ),
+            tabPanel(
+              title = "Compare APY's",
+              icon = icon("credit-card", class = "about-icon", lib = "glyphicon"),
+              plotOutput("compareAPYsPlot")
+            ),
+            tabPanel(
+              title = "Compare Returns",
+              icon = icon("piggy-bank", class = "about-icon", lib = "glyphicon"),
+              plotOutput("compareReturnsPlot")
+            )
+          )
         ),
         tabPanel(
-          title = "Compare Returns\nby Coins",
+          title = "Compare Assets",
           value = "compareReturnsCoins",
           icon = icon("stats", class = "about-icon", lib = "glyphicon"),
           plotOutput("compareReturnsCoinsPlot")
@@ -279,6 +342,7 @@ ui <- fluidPage(
               icon = icon("cloud", class = "about-icon", lib = "glyphicon"),
               h4(textOutput("platformRefsHeader")),
               p(textOutput("platformAbout")),
+              DT::dataTableOutput("platformData"),
               DT::dataTableOutput("platformRefs")
             ),
             tabPanel(
@@ -287,6 +351,7 @@ ui <- fluidPage(
               icon = icon("bitcoin", class = "about-icon"),
               #, lib = "glyphicon"),
               h4(textOutput("currencyRefsHeader")),
+              DT::dataTableOutput("currencyData"),
               DT::dataTableOutput("currencyRefs")
             )
           )
@@ -379,6 +444,13 @@ server <- function(input, output, session) {
   })
   
   
+  output$whitespace1 <- renderUI({HTML('<br/>')})
+    
+  
+  
+  output$whitespace2 <- renderUI({HTML('<br/>')})
+  
+  
   output$disclaimersHeader <-
     renderText({
       "Importan Info and Disclaimers"
@@ -457,16 +529,15 @@ server <- function(input, output, session) {
     req(input$platform)
     pltf = input$platform
     
-    paste(pltf, "Platform")
+    refs = platform_refs[platform == pltf,]
+    
+    paste(pltf, "Platform", ifelse(is.na(refs$exchangeId), "", "and Exchange"))
   })
   
   output$currencyRefsHeader <- renderText({
     req(input$ticker)
     cur = input$ticker
-    
-    network = currencies[currency == cur,]$network
-    
-    paste0(network, " (", cur, ")")
+    makeCurrencyNetwork(cur)
   })
   
   
@@ -480,10 +551,7 @@ server <- function(input, output, session) {
   output$resoureCoinTabPanelTitle = renderText({
     req(input$ticker)
     cur = input$ticker
-    
-    refs = currencies[currency == cur,]
-    network = refs$network
-    paste0(network, " (", cur, ")")
+    makeCurrencyNetwork(cur)
   })
   
   output$platformAbout <- renderText({
@@ -572,6 +640,37 @@ server <- function(input, output, session) {
   })
   
   
+  output$platformData <- DT::renderDataTable({
+    req(input$platform)
+    pltf = input$platform
+    
+    refs = platform_refs[platform == pltf,]
+    if(is.na(refs$exchangeId))
+      return(NULL)
+    else {
+      DT::datatable(
+        data.frame(
+          refs$rank,
+          scales::percent(refs$percentTotalVolume/100., accuracy = 0.01),
+          scales::label_number_si(accuracy = 0.01)(refs$volumeUsd),
+          refs$tradingPairs
+        ),
+        # caption = makeCurrencyNetwork(cur),
+        options = c(g_DT_options,  list(dom = 't', bSort = FALSE)),
+        rownames = FALSE,
+        colnames = c(
+          "Exchange Rank",
+          "Percent of total volume",
+          "Volume (US$)",
+          "Trading Pairs"
+        ),
+        escape = FALSE
+      )
+    }
+    
+  })
+  
+  
   output$currencyRefs <- DT::renderDataTable({
     req(input$ticker)
     cur = input$ticker
@@ -594,13 +693,68 @@ server <- function(input, output, session) {
       refs$website,
       "</a>"
     )
+    explorer_url = paste0(
+      "Blockchain explorer: <a href='",
+      refs$explorer,
+      "' target='_blank'>",
+      refs$explorer,
+      "</a>"
+    )
     
     DT::datatable(
-      data.frame(c(desc, whitepaper_url, website_url)),
-      # caption = paste0(network, " (", cur, ")"),
+      data.frame(c(desc, whitepaper_url, website_url, explorer_url)),
+      # caption = makeCurrencyNetwork(cur),
       options = c(g_DT_options,  list(dom = 't', bSort = FALSE)),
       rownames = FALSE,
       colnames = "",
+      escape = FALSE
+    )
+    
+  })
+  
+  
+  output$currencyData <- DT::renderDataTable({
+    req(input$ticker)
+    cur = input$ticker
+    
+    refs = currencies[currency == cur, ]
+    currency_data = c(
+      rank = refs$rank,
+      supply = refs$supply,
+      maxSupply = refs$maxSupply,
+      marketCapUsd = refs$marketCapUsd,
+      volumeUsd24Hr = refs$volumeUsd24Hr,
+      priceUsd = refs$priceUsd,
+      changePercent24Hr = refs$changePercent24Hr
+    )
+    currency_data = ifelse(is.na(currency_data), 0, currency_data)
+    
+    DT::datatable(
+      data.frame(
+        currency_data[["rank"]],
+        scales::label_number_si(accuracy = 0.1)(currency_data[["supply"]]) ,
+        ifelse(
+          currency_data[["maxSupply"]] > 0,
+          scales::percent(currency_data[["supply"]] / currency_data[["maxSupply"]]),
+          0.
+        ),
+        scales::label_number_si(accuracy = 0.1)(currency_data[["marketCapUsd"]]),
+        scales::label_number_si(accuracy = 0.1)(currency_data[["volumeUsd24Hr"]]),
+        scales::label_number_si(accuracy = 0.01)(currency_data[["priceUsd"]]),
+        scales::percent(currency_data[["changePercent24Hr"]] / 100.)
+      ),
+      # caption = makeCurrencyNetwork(cur),
+      options = c(g_DT_options,  list(dom = 't', bSort = FALSE)),
+      rownames = FALSE,
+      colnames = c(
+        "Popularity",
+        "Circulation supply (US$)",
+        "% of total supply",
+        "Market cap (US$)",
+        "Volume 24h (US$)",
+        "Price (US$)",
+        "% Change (24h)"
+      ),
       escape = FALSE
     )
     
@@ -676,7 +830,7 @@ server <- function(input, output, session) {
   output$earnCryptoData <- DT::renderDataTable({
     DT::datatable(
       g_crypto_earn_data,
-      # caption = paste0(network, " (", cur, ")"),
+      # caption = makeCurrencyNetwork(cur),
       options = c(g_DT_options,  list(dom = 't', bSort = FALSE)),
       rownames = FALSE,
       colnames = "",
@@ -702,7 +856,7 @@ server <- function(input, output, session) {
     cur = input$ticker
     
     ref = currencies[currency == cur,]
-    website = ref$webiste
+    website = ref$website
     network = ref$network
     text = paste0("Explore ", network, " (", cur, ")")
     return(tagList(h6(em(
@@ -771,7 +925,7 @@ server <- function(input, output, session) {
     x_step = (x_stop - x_start) / x_step_freq
     
     x = seq(x_start, x_stop, x_step)
-    y = sapply(x, computeReturn, pltf, cur, months, FALSE) - x - fee
+    y = sapply(x, computeReturn, pltf, cur, months) - x - fee
 
     r = factor(sapply(x, function(v, bfr)
       bfr[v < amount_upper & v >= amount_lower, ]$apy,
@@ -841,11 +995,73 @@ server <- function(input, output, session) {
       theme_tufte(ticks = FALSE, base_size = 16) +
       theme(
         legend.position = "right",
-        plot.caption = element_text(
-          color = "black",
-          face = "italic",
-          size = 10
-        )
+        plot.caption = element_text(color = "black",face = "italic",size = 10)
+      )
+    
+    return(p)
+  })
+  
+  
+  output$compareAPYsAndReturnsPlot <- renderPlot({
+    req(input$ticker, input$months, input$upperRange)
+    cur = input$ticker
+    cur_network = makeCurrencyNetwork(cur)
+    months = input$months
+    amount = input$upperRange
+    
+    df = makeAPYReturnForCurrency(cur, amount, months)
+    
+    caption_notes = makeDisclaimers(cur, NA, NA, NA)
+    caption_text = paste(caption_notes, collapse = '\n')
+    
+    p = ggplot(data = df, aes(platform, value, fill = platform)) +
+      geom_bar(stat = 'identity') +
+      facet_wrap( ~ cat, scales = "free_y", nrow = 2) +
+      scale_fill_manual(palette = getTableauPalette(length(unique(df$platform)))) +
+      labs(
+        title = paste(cur_network, "Compound Returns¹ and APY's by Platform"),
+        subtitle = paste("Interest earned on",amount,cur,"after",months,"months"),
+        x = NULL,
+        y = NULL,
+        caption = caption_text
+      ) +
+      theme_tufte(ticks = FALSE, base_size = 18) +
+      theme(
+        legend.position = "none",
+        plot.caption = element_text(color = "black", face = "italic", size = 10)
+      )
+    
+    return(p)
+  })
+  
+  output$compareAPYsPlot <- renderPlot({
+    req(input$ticker, input$months, input$upperRange)
+    cur = input$ticker
+    cur_network = makeCurrencyNetwork(cur)
+    months = input$months
+    amount = input$upperRange
+    
+    df = makeAPYReturnForCurrency(cur, amount, months)
+    df = df[cat == "APY" ,]
+    
+    caption_notes = makeDisclaimers(cur, NA, NA, NA)
+    caption_text = paste(caption_notes, collapse = '\n')
+    
+    p = ggplot(data = df, aes(platform, value, fill = platform)) +
+      geom_bar(stat = 'identity') +
+      scale_y_continuous(labels = percent) +
+      scale_fill_manual(palette = getTableauPalette(length(unique(df$platform)))) +
+      labs(
+        title = paste(cur_network, "Compound APY's by Platform"),
+        subtitle = paste("Earnings on",amount,cur,"after",months,"months"),
+        x = NULL,
+        y = "APY",
+        caption = caption_text
+      ) +
+      theme_tufte(ticks = FALSE, base_size = 18) +
+      theme(
+        legend.position = "none",
+        plot.caption = element_text(color = "black", face = "italic", size = 10)
       )
     
     return(p)
@@ -855,57 +1071,31 @@ server <- function(input, output, session) {
   output$compareReturnsPlot <- renderPlot({
     req(input$ticker, input$months, input$upperRange)
     cur = input$ticker
-    network = currencies[currency == cur,]$network
-    cur_network = paste0(network, ' (', cur, ')')
+    cur_network = makeCurrencyNetwork(cur)
     months = input$months
     amount = input$upperRange
     
-    df = data.frame(platform = character(0),
-                    cat = character(0),
-                    value = numeric(0))
-    for (pltf in unique(platform_rates[currency == cur,]$platform)) {
-      fee = platform_penalties[platform == pltf & currency == cur, fee]
-      ret = computeReturn(amount, pltf, cur, months) - amount - fee
-      apy = computeReturn(amount, pltf, cur, months, returnApy = TRUE)
-      df = rbind(df, data.frame(
-        platform = pltf,
-        cat = c('Earnings', 'APY'),
-        value = c(ret, apy)
-      ))
-    }
+    df = makeAPYReturnForCurrency(cur, amount, months)
+    df = df[cat == "Earnings" ,]
     
     caption_notes = makeDisclaimers(cur, NA, NA, NA)
     caption_text = paste(caption_notes, collapse = '\n')
     
     p = ggplot(data = df, aes(platform, value, fill = platform)) +
       geom_bar(stat = 'identity') +
-      facet_wrap( ~ cat, scales = "free_y", nrow = 2) +
-      scale_fill_manual(palette = tableau_color_pal(palette = getTableauPalette(length(
-        unique(df$platform)
-      )))) +
+      #scale_y_continuous(labels = percent) +
+      scale_fill_manual(palette = getTableauPalette(length(unique(df$platform)))) +
       labs(
-        title = paste(cur_network, "Compound Returns¹ and APY's by Platform"),
-        subtitle = paste0(
-          "Interest earned on ",
-          amount,
-          " ",
-          cur,
-          " after ",
-          months,
-          " months"
-        ),
+        title = paste(cur_network, "Compound Returns by Platform"),
+        subtitle = paste("APY promised on",amount,cur),
         x = NULL,
-        y = NULL,
+        y = paste0("Earnings (",cur,")"),
         caption = caption_text
       ) +
-      theme_tufte(ticks = FALSE, base_size = 16) +
+      theme_tufte(ticks = FALSE, base_size = 18) +
       theme(
         legend.position = "none",
-        plot.caption = element_text(
-          color = "black",
-          face = "italic",
-          size = 10
-        )
+        plot.caption = element_text(color = "black", face = "italic", size = 10)
       )
     
     return(p)
@@ -926,11 +1116,9 @@ server <- function(input, output, session) {
                                 currency)) +
       geom_bar(stat = 'identity') +
       scale_y_continuous(labels = scales::percent) +
-      scale_fill_manual(palette = tableau_color_pal(palette = getTableauPalette(length(
-        unique(df$currency)
-      )))) +
+      scale_fill_manual(palette = getTableauPalette(length(unique(df$currency)))) +
       labs(
-        title = paste(pltf, "APY's by Coin"),
+        title = paste(pltf, "APY's by Assets"),
         # subtitle = paste0("Interest earned on ",amount," ",cur," after ",months," months"),
         x = NULL,
         y = NULL,
@@ -950,9 +1138,6 @@ server <- function(input, output, session) {
     
   })
 }
-
-
-
 
 
 # TODO - image rendering
