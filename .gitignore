@@ -15,3 +15,6 @@ rsconnect/
 
 # Log Files
 logfile*.txt
+
+# Properties
+*.properties
