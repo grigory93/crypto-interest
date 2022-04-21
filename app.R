@@ -32,13 +32,9 @@ currencies = platform_data[["currencies"]]
 about_savings = platform_data[["about"]]
 
 # Crypto API
-currency_asset_data = load_assets()
-currency_asset_data = currency_asset_data[symbol %in% currencies$currency]
-currencies = currency_asset_data[currencies, on=c(symbol="currency_join")]
-currencies[, network := ifelse(is.na(name), network, name)]
-
-exchange_data = load_exchanges()
-platform_refs = exchange_data[platform_refs, on="exchangeId"]
+currencies = m_load_assets(currencies)
+platform_rates = currencies[, c('currency', 'priceUsd')][platform_rates, on='currency']
+platform_refs = m_load_exchanges(platform_refs)
 
 
 makeCurrencyOptions <- function(pltf = NULL) {
@@ -46,7 +42,7 @@ makeCurrencyOptions <- function(pltf = NULL) {
     dd = platform_rates
   else
     dd = platform_rates[platform == pltf, ]
-  setorder(dd, type, currency)[, option_text := sprintf("%s (%s)", network, currency)]
+  setorder(dd, type, currency)[, option_text := sprintf("%s (%s $%.2f)", network, currency, priceUsd)]
   dd = dd[, .SD[1,], currency]
   
   ddd = dd[, .(option_text = list(option_text),
