@@ -67,6 +67,8 @@ g_currencies = rbindlist(list(
        max_value=g_stable_coint_top_value,
        whitepaper="https://tether.to/wp-content/uploads/2016/06/TetherWhitePaper.pdf",
        website="https://tether.to/",
+       parent="https://en.wikipedia.org/wiki/Bitfinex",
+       wikipedia="https://en.wikipedia.org/wiki/Tether_(cryptocurrency)",
        type="stablecoin"),
   list(currency='USDC',
        currency_join = 'USDC',
@@ -75,6 +77,8 @@ g_currencies = rbindlist(list(
        max_value=g_stable_coint_top_value,
        whitepaper="https://f.hubspotusercontent30.net/hubfs/9304636/PDF/centre-whitepaper.pdf",
        website="https://www.centre.io/usdc", # https://www.circle.com/en/usdc https://www.coinbase.com/usdc/
+       parent="https://en.wikipedia.org/wiki/Circle_(company)",
+       wikipedia="https://en.wikipedia.org/wiki/USD_Coin",
        type="stablecoin"), 
   list(currency='PAX',
        currency_join = 'PAX',
@@ -83,14 +87,18 @@ g_currencies = rbindlist(list(
        max_value=g_stable_coint_top_value,
        whitepaper="https://standard.paxos.com/whitepaper.pdf",
        website="https://paxos.com/standard",
+       parent="https://en.wikipedia.org/wiki/Paxos_Trust_Company",
+       wikipedia="https://en.bitcoinwiki.org/wiki/Paxos_Standard_Token",
        type="stablecoin"),
   list(currency='BUSD',
        currency_join = 'BUSD',
        network='Binance USD',
-       desc='BUSD is a stablecoin founded by Paxos and Binance. Paxos uses blockchain technology to offer their Stablecoin as a Service product to external companies. In the past, they also created a gold-backed stablecoin called PAX Gold (PAXG). The New York State Department of Financial Services regulates both BUSD and PAXG tokens.',
+       desc='BUSD is a stablecoin running on Ethereum and founded by Paxos and Binance. For stablecoins like BUSD, the company behind the protocol is responsible for holding reserves that fully back each token. The companies behind BUSD, Binance and Paxos, claim that each BUSD token is backed by and corresponds to one dollar held in traditional bank accounts. Paxos uses blockchain technology to offer their Stablecoin as a Service product to external companies. In the past, they also created a gold-backed stablecoin called PAX Gold (PAXG). The New York State Department of Financial Services regulates both BUSD and PAXG tokens.',
        max_value=g_stable_coint_top_value,
        whitepaper="https://www.binance.com/en/blog/futures/busd-all-you-need-to-know-about-the-stablecoin-421499824684903051",
        website="https://www.binance.com/en/busd",
+       parent="https://en.wikipedia.org/wiki/Binance",
+       wikipedia="https://en.bitcoinwiki.org/wiki/BUSD",
        type="stablecoin"),
   list(currency='DAI',
        currency_join = 'DAI',
@@ -99,6 +107,8 @@ g_currencies = rbindlist(list(
        max_value=g_stable_coint_top_value,
        whitepaper="https://makerdao.com/whitepaper/",
        website="https://makerdao.com/",
+       parent="https://crypto.marketswiki.com/index.php?title=Maker",
+       wikipedia="https://en.wikipedia.org/wiki/Dai_(cryptocurrency)",
        type="stablecoin"),
   list(currency='GUSD',
        currency_join = 'GUSD',
@@ -107,6 +117,8 @@ g_currencies = rbindlist(list(
        max_value=g_stable_coint_top_value,
        whitepaper="https://www.gemini.com/static/dollar/gemini-dollar-whitepaper.pdf",
        website="https://www.gemini.com/dollar",
+       parent="https://en.wikipedia.org/wiki/Gemini_(company)",
+       wikipedia="https://crypto.marketswiki.com/index.php?title=Gemini_dollar",
        type="stablecoin"),
   list(currency='UST',
        currency_join = 'UST',
@@ -115,6 +127,8 @@ g_currencies = rbindlist(list(
        max_value=g_stable_coint_top_value,
        whitepaper="https://www.terra.money/Terra_White_paper.pdf",
        website="https://www.terra.money/",
+       parent="https://en.bitcoinwiki.org/wiki/Terra_LUNA",
+       wikipedia="https://everipedia.org/wiki/lang_en/terra-cryptocurrency",
        type="stablecoin"),
   list(currency='TUSD',
        currency_join = 'TUSD',
@@ -123,6 +137,8 @@ g_currencies = rbindlist(list(
        max_value=g_stable_coint_top_value,
        whitepaper="https://www.globenewswire.com/news-release/2021/06/18/2249389/0/en/TrueUSD-Integrates-with-Signature-Bank-s-Blockchain-based-Payments-Platform-Signet.html",
        website="https://trueusd.com/",
+       parent="https://en.wikipedia.org/wiki/Stablecoin",
+       wikipedia="https://en.bitcoinwiki.org/wiki/TrueUSD",
        type="stablecoin"),
   list(currency='PAXG',
        currency_join = 'PAXG',
@@ -131,6 +147,8 @@ g_currencies = rbindlist(list(
        max_value=10.,
        whitepaper="https://www.paxos.com/wp-content/uploads/2019/09/PAX-Gold-Whitepaper.pdf",
        website="https://www.paxos.com/paxgold/",
+       parent="https://en.wikipedia.org/wiki/Paxos_Trust_Company",
+       wikipedia="https://en.wikipedia.org/wiki/Paxos_Trust_Company",
        type="stablecoin"),
   list(currency='BTC',
        currency_join = 'BTC',
@@ -139,6 +157,8 @@ g_currencies = rbindlist(list(
        max_value=0.5,
        whitepaper="https://bitcoin.org/bitcoin.pdf",
        website="https://bitcoin.org/",
+       parent="https://en.wikipedia.org/wiki/Satoshi_Nakamoto",
+       wikipedia="https://en.wikipedia.org/wiki/Bitcoin",
        type="currency"),
   list(currency='ETH',
        currency_join = 'ETH',
@@ -147,6 +167,8 @@ g_currencies = rbindlist(list(
        max_value=10.,
        whitepaper="https://github.com/ethereum/wiki/wiki/White-Paper",
        website="https://ethereum.org/",
+       parent="https://en.wikipedia.org/wiki/Vitalik_Buterin",
+       wikipedia="https://en.wikipedia.org/wiki/Ethereum",
        type="smart contract"),
   list(currency='LTC',
        currency_join = 'LTC',
@@ -155,6 +177,8 @@ g_currencies = rbindlist(list(
        max_value=150.,
        whitepaper="https://bitcoin.org/bitcoin.pdf",
        website="https://litecoin.org/",
+       parent="https://en.wikipedia.org/wiki/Litecoin",
+       wikipedia="https://en.wikipedia.org/wiki/Litecoin",
        type="currency"),
   list(currency='LINK',
        currency_join = 'LINK',
@@ -163,6 +187,8 @@ g_currencies = rbindlist(list(
        max_value=750.,
        whitepaper="https://link.smartcontract.com/whitepaper",
        website="https://chain.link/",
+       parent="https://en.wikipedia.org/wiki/Chainlink_(blockchain)",
+       wikipedia="https://en.bitcoinwiki.org/wiki/ChainLink",
        type="smart contract"),
   list(currency='UNI',
        currency_join = 'UNI',
@@ -171,6 +197,8 @@ g_currencies = rbindlist(list(
        max_value=1500.,
        whitepaper="https://uniswap.org/whitepaper.pdf",
        website="https://uniswap.org/",
+       parent="https://crypto.marketswiki.com/index.php?title=Uniswap",
+       wikipedia="https://en.wikipedia.org/wiki/Uniswap",
        type="smart contract"),
   list(currency='BAT',
        currency_join = 'BAT',
@@ -179,6 +207,8 @@ g_currencies = rbindlist(list(
        max_value=20000.,
        whitepaper="https://basicattentiontoken.org/static-assets/documents/BasicAttentionTokenWhitePaper-4.pdf",
        website="https://basicattentiontoken.org/",
+       parent="https://en.wikipedia.org/wiki/Brave_(web_browser)",
+       wikipedia="https://en.wikipedia.org/wiki/Brave_(web_browser)#Basic_Attention_Token",
        type="smart contract"),
   list(currency='DOT',
        currency_join = 'DOT',
@@ -187,6 +217,8 @@ g_currencies = rbindlist(list(
        max_value=800.,
        whitepaper="https://polkadot.network/PolkaDotPaper.pdf",
        website="https://polkadot.network/",
+       parent="https://en.bitcoinwiki.org/wiki/Polkadot",
+       wikipedia="https://en.wikipedia.org/wiki/Polkadot_(cryptocurrency)",
        type="smart contract"),
   list(currency='ADA',
        currency_join = 'ADA',
@@ -195,6 +227,8 @@ g_currencies = rbindlist(list(
        max_value=20000.,
        whitepaper="https://www.cardano.org/",
        website="https://docs.cardano.org/en/latest/",
+       parent="https://en.wikipedia.org/wiki/Charles_Hoskinson#IOHK_&_Cardano",
+       wikipedia="https://en.wikipedia.org/wiki/Cardano_(blockchain_platform)",
        type="smart contract"),
   list(currency='LUNA',
        currency_join = 'LUNA',
@@ -203,6 +237,8 @@ g_currencies = rbindlist(list(
        max_value=400.,
        whitepaper="https://www.terra.money/Terra_White_paper.pdf",
        website="https://www.terra.money/",
+       parent="https://en.bitcoinwiki.org/wiki/Terra_LUNA",
+       wikipedia="https://everipedia.org/wiki/lang_en/terra-cryptocurrency",
        type="smart contract"),
   list(currency='ETH2',
        currency_join = 'ETH',
@@ -211,6 +247,8 @@ g_currencies = rbindlist(list(
        max_value=10.,
        whitepaper="https://medium.com/@VitalikButerin/a-proof-of-stake-design-philosophy-506585978d51",
        website="https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/",
+       parent="https://en.wikipedia.org/wiki/Vitalik_Buterin",
+       wikipedia="https://en.wikipedia.org/wiki/Ethereum",
        type="smart contract"),
   list(currency='XTZ',
        currency_join = 'XTZ',
@@ -219,6 +257,8 @@ g_currencies = rbindlist(list(
        max_value=10000.,
        whitepaper="https://wiki.tezosagora.org/whitepaper",
        website="https://tezos.com/",
+       parent="https://en.bitcoinwiki.org/wiki/Tezos",
+       wikipedia="https://en.wikipedia.org/wiki/Tezos",
        type="smart contract"),
   list(currency='ATOM',
        currency_join = 'ATOM',
@@ -227,6 +267,8 @@ g_currencies = rbindlist(list(
        max_value=800.,
        whitepaper="https://v1.cosmos.network/resources/whitepaper",
        website="https://cosmos.network/",
+       parent="https://cryptowiki.me/wiki/Cosmos_(ATOM)",
+       wikipedia="https://en.bitcoinwiki.org/wiki/Cosmos",
        type="smart contract"),
   list(currency='ALGO',
        currency_join = 'ALGO',
@@ -235,6 +277,8 @@ g_currencies = rbindlist(list(
        max_value=50000.,
        whitepaper="https://www.algorand.com/technology/white-papers/",
        website="https://www.algorand.com/",
+       parent="https://cryptowiki.me/wiki/Algorand_(ALGO)",
+       wikipedia="https://en.wikipedia.org/wiki/Algorand",
        type="smart contract"),
   list(currency='DOGE',
        currency_join = 'DOGE',
@@ -243,6 +287,8 @@ g_currencies = rbindlist(list(
        max_value=200000.,
        whitepaper="https://www.reddit.com/r/dogecoin/comments/7pffe4/the_doge_whitepaper/",
        website="http://dogecoin.com/",
+       parent="https://en.wikipedia.org/wiki/Elon_Musk",
+       wikipedia="https://en.wikipedia.org/wiki/Dogecoin",
        type="currency"),
   list(currency='BCH',
        currency_join = 'BCH',
@@ -251,6 +297,8 @@ g_currencies = rbindlist(list(
        max_value=200000.,
        whitepaper="http://bch.info/bitcoin.pdf",
        website="http://bch.info/",
+       parent="https://en.wikipedia.org/wiki/Bitcoin",
+       wikipedia="https://en.wikipedia.org/wiki/Bitcoin_Cash",
        type="currency"),
   list(currency='AVAX',
        currency_join = 'AVAX',
@@ -259,6 +307,8 @@ g_currencies = rbindlist(list(
        max_value=300.,
        whitepaper="https://www.avalabs.org/whitepapers",
        website="https://www.avax.network/",
+       parent="https://en.wikipedia.org/wiki/Emin_G%C3%BCn_Sirer",
+       wikipedia="https://en.wikipedia.org/wiki/Avalanche_(blockchain_platform)",
        type="smart contract"),
   list(currency='SOL',
        currency_join = 'SOL',
@@ -267,6 +317,8 @@ g_currencies = rbindlist(list(
        max_value=300.,
        whitepaper="https://solana.com/solana-whitepaper.pdf",
        website="https://solana.com/",
+       parent="https://cryptowiki.me/wiki/Solana_(SOL)",
+       wikipedia="https://en.wikipedia.org/wiki/Solana_(blockchain_platform)",
        type="smart contract"),
   list(currency='MATIC',
        currency_join = 'MATIC',
@@ -275,6 +327,8 @@ g_currencies = rbindlist(list(
        max_value=20000.,
        whitepaper="https://polygon.technology/lightpaper-polygon.pdf",
        website="https://polygon.technology/",
+       parent="https://cryptowiki.me/wiki/Polygon_(MATIC)",
+       wikipedia="https://cryptowiki.me/wiki/Polygon_(MATIC)",
        type="smart contract"),
   list(currency='$',
        currency_join = '$',
@@ -283,6 +337,8 @@ g_currencies = rbindlist(list(
        max_value=20000.,
        whitepaper="https://www.federalreserve.gov/publications/money-and-payments-discussion-paper.htm",
        website="https://www.usmint.gov/",
+       parent="",
+       wikipedia="",
        type="fiat")
 ))
 
@@ -312,9 +368,11 @@ getEmptyData <- function() {
                                 referral_ref = character(0),
                                 referral_text = character(0),
                                 about_ref = character(0),
+                                wiki_ref = character(0),
                                 about_text = character(0),
+                                mission_ref = character(0),
                                 logo = character(0),
-                                more_info = list())))
+                                more_info = character(0))))
 }
 
 
@@ -325,40 +383,48 @@ g_refs = rbindlist(list(
        fee_ref="https://blockfi.com/fees/",
        referral_ref="https://blockfi.com/?ref=ba91219a",
        referral_text="Earn free $40 in Bitcoin when you open BlockFi Account",
-       about_ref="",
-       about_text="",
+       about_ref="https://blockfi.com/resource-center/",
+       wiki_ref="https://crypto.marketswiki.com/index.php?title=BlockFi",
+       about_text="BlockFi’s vision is to bridge the worlds of traditional finance and blockchain technology to bring financial empowerment to clients on a global scale.",
+       mission_ref="https://blockfi.com/mission/",
        logo="https://s2-recruiting.cdn.greenhouse.io/external_greenhouse_job_boards/logos/400/699/300/resized/BlockFi_Logo_2020_BlockFi-2020-Full-Color-1200x628.png",
-       more_info=list()),
+       more_info="As of February 14, 2022, BlockFi Interest Accounts (BIAs) are no longer available to new clients who are “U.S. persons” or persons located in the United States and such U.S. clients will be unable to transfer new assets to their BIAs."),
   list(platform="Crypto.com",
        exchangeId="crypto",
        rate_ref="https://crypto.com/us/earn",
        fee_ref="https://crypto.com/exchange/document/fees-limits",
        referral_ref="https://platinum.crypto.com/r/ytzc5pkeun",
        referral_text="Get $25 USD when you sign-up for Crypto.com account",
-       about_ref="",
-       about_text="",
+       about_ref="https://crypto.com/about",
+       wiki_ref="https://en.wikipedia.org/wiki/Crypto.com",
+       about_text="Crypto.com is a cryptocurrency exchange app based in Singapore. As of 2021, the app has 10 million users and 3,000 employees. (Wikipedia)",
+       mission_ref="https://crypto.com/us/about",
        logo="https://logos-download.com/wp-content/uploads/2021/02/Crypto.com_Logo.png",
-       more_info=list("The fees apply to withdrawals using native network or ERC20 network (when applicable).")),
+       more_info="The fees apply to withdrawals using native network or ERC20 network (when applicable)."),
   list(platform="Celsius",
        exchangeId=NA,
        rate_ref="https://celsius.network/rates",
        fee_ref=NA,
        referral_ref="https://celsiusnetwork.app.link/1140759ba6",
        referral_text="Earn free $50 in Bitcoin with Celsius",
-       about_ref="",
-       about_text="",
+       about_ref="https://celsius.network/about-us",
+       wiki_ref="https://en.bitcoinwiki.org/wiki/Celsius_Network",
+       about_text="Celsius is proud to provide a platform of curated services that have been abandoned by big banks – things like fair yield, zero fees, and lightning quick transactions. Our goal is to disrupt the financial industry, one happy user at a time, and introduce financial freedom through crypto.",
+       mission_ref="https://blog.celsius.network/the-mission-and-values-of-celsius-network-b5715732dc7",
        logo="https://mma.prnewswire.com/media/1504869/Celsius_Logo.jpg?w=200",
-       more_info=list()),
+       more_info=NA),
   list(platform="Gemini",
        exchangeId="gemini",
        rate_ref="https://www.gemini.com/earn",
-       fee_ref=NA,
+       fee_ref="https://www.gemini.com/fees/transfer-fee-schedule#section-withdrawal-fees-individual-customers",
        referral_ref="https://www.gemini.com/share/77qe6nafp",
        referral_text="Get $10 in free Bitcoin when you open account on Gemini and trade $100",
-       about_ref="",
-       about_text="",
+       about_ref="https://www.gemini.com/about",
+       wiki_ref="https://en.wikipedia.org/wiki/Gemini_(company)",
+       about_text="Gemini Trust Company, LLC (Gemini) is a cryptocurrency exchange and custodian that allows customers to buy, sell, and store digital assets. It is a New York trust company that is regulated by the New York State Department of Financial Services (NYDFS) and was founded in 2014 by Cameron and Tyler Winklevoss. (Wikipedia)",
+       mission_ref="https://celsius.network/about-us",
        logo="https://mma.prnewswire.com/media/930231/Gemini___Logo.jpg?w=200",
-       more_info=list()),
+       more_info=NA),
   list(platform="Coinbase",
        exchangeId="gdax",
        rate_ref="https://www.coinbase.com/staking",
@@ -366,9 +432,11 @@ g_refs = rbindlist(list(
        referral_ref="https://www.coinbase.com/join/kanevs_67",
        referral_text="Get $10 in free Bitcoin when you buy or sell $100 or more in crypto on Coinbase",
        about_ref="https://help.coinbase.com/en/coinbase/getting-started/crypto-education/what-is-coinbase",
+       wiki_ref="https://en.wikipedia.org/wiki/Coinbase",
        about_text="Coinbase is a secure online platform for buying, selling, transferring, and storing digital currency. Our mission is to create an open financial system for the world and to be the leading global brand for helping people convert digital currency into and out of their local currency.",
+       mission_ref="https://www.coinbase.com/mission",
        logo="https://mma.prnewswire.com/media/1660649/Coinbase_Logo.jpg?w=200",
-       more_info=list()),
+       more_info=NA),
   list(platform="Nexo",
        exchangeId=NA,
        rate_ref="https://nexo.io/blog/a-new-yield-program-is-coming-to-our-earn-interest-suite-in-december",
@@ -376,9 +444,11 @@ g_refs = rbindlist(list(
        referral_ref="",
        referral_text="",
        about_ref="",
+       wiki_ref="",
        about_text="",
+       mission_ref="",
        logo=NA,
-       more_info=list("up to 5 free crypto withdrawals per month")),
+       more_info="up to 5 free crypto withdrawals per month"),
   list(platform="Vauld",
        exchangeId=NA,
        rate_ref="https://www.vauld.com/rates",
@@ -386,19 +456,23 @@ g_refs = rbindlist(list(
        referral_ref="",
        referral_text="",
        about_ref="",
+       wiki_ref="",
        about_text="",
+       mission_ref="",
        logo=NA,
-       more_info=list()),
+       more_info=NA),
   list(platform="AQRU",
        exchangeId=NA,
        rate_ref="https://aqru.io/frequently-asked-questions/",
        fee_ref="https://aqru.io/frequently-asked-questions/",
-       referral_ref="",
-       referral_text="",
-       about_ref="",
+       referral_ref="https://aqru.io?code=NDRXUA",
+       referral_text="Try for free with 10 USDT instant bonus. Receive extra 75 USDT after investing $500",
+       about_ref="https://aqru.io/terms-of-use/",
+       wiki_ref="https://www.linkedin.com/company/get-aqru/about/",
        about_text="AQRU is a simple app that helps you to buy, invest and earn interest on your Crypto assets. Your annual interest is paid daily and tracked to the second.",
+       mission_ref="https://aqru.io/insights/aqru-launches-an-app-to-help-everyone-earn-interest-on-their-crypto/",
        logo=NA,
-       more_info=list())
+       more_info="Not yet available in United States.<br>No fees on buying Crypto. Withdraw your returns anytime and receive funds within 24 hours in either fiat or Crypto. No fees on Fiat withdrawals.<br>Customers can make deposits via bank transfer, credit card, or transfer Crypto. No fees on Bank Transfer or Crypto Transfers.")
 ))
 
 
@@ -429,34 +503,33 @@ makePlatformData <- function(platform, rates, penalties) {
 # [BlockFi web site](https://blockfi.com/rates/) and 
 # [BlockFi Fees](https://blockfi.com/fees/):
 getBlockFiData <- function(platform = "BlockFi") {
-  
   pltf = platform
   
   blockfi_data = transpose(data.table(
     make.names = c("currency", "amount_upper", "apy", "fee", "limit", "one_free", "note"),
-    BTC1 =        c('BTC', 0.1,  4.0,  0.00075, 100, TRUE, NA),
+    BTC1 =        c('BTC', 0.1,  3.0,  0.00075, 100, TRUE, NA),
     BTC2 =        c('BTC', 0.35, 1.,   0.00075, 100, TRUE, NA),
     BTC3 =        c('BTC', Inf,  .1,   0.00075, 100, TRUE, NA),
     
-    ETH1 =        c('ETH', 1.5,  4.,   0.015,   5000, FALSE, NA),
+    ETH1 =        c('ETH', 1.5,  3.,   0.015,   5000, FALSE, NA),
     ETH2 =        c('ETH', 5.,   1.5,  0.015,   5000, FALSE, NA),
     ETH3 =        c('ETH', Inf,  .25,  0.015,   5000, FALSE, NA),
     
-    LTC1 =        c('LTC', 20,   3.5,  0.001,   10000, TRUE, NA),
-    LTC2 =        c('LTC', 100,  1.,   0.001,   10000, TRUE, NA),
+    LTC1 =        c('LTC', 20,   3.75,  0.001,   10000, TRUE, NA),
+    LTC2 =        c('LTC', 100,  1.25,   0.001,   10000, TRUE, NA),
     LTC3 =        c('LTC', Inf,  .1,   0.001,   10000, TRUE, NA),
     
     UNI1 =        c('UNI', 100,  3.25, 2.5,     5500, FALSE, NA),
     UNI2 =        c('UNI', 500,  .2,   2.5,     5500, FALSE, NA),
     UNI3 =        c('UNI', Inf,  .1,   2.5,     5500, FALSE, NA),
     
-    LINK1 =       c('LINK', 100, 2.5,  2,       65000, FALSE, NA),
-    LINK2 =       c('LINK', 500, .2,   2,       65000, FALSE, NA),
+    LINK1 =       c('LINK', 100, 3.,  2,       65000, FALSE, NA),
+    LINK2 =       c('LINK', 500, .5,   2,       65000, FALSE, NA),
     LINK3 =       c('LINK', Inf, .1,   2,       65000, FALSE, NA),
     
     DOGE =        c('DOGE', Inf, 2.,   0,       0., FALSE, "No external transfers. You can buy, sell and trade it, but transfers into and out of BlockFi aren’t supported. Convert to another crypto to withdraw."),
     ALGO =        c('ALGO', Inf, 2.5,  0.,      0., FALSE, "No external transfers. You can buy, sell and trade it, but transfers into and out of BlockFi aren’t supported. Convert to another crypto to withdraw."),
-    BCH =         c('BCH', Inf,  4.5,  0.,      0., FALSE, "No external transfers. You can buy, sell and trade it, but transfers into and out of BlockFi aren’t supported. Convert to another crypto to withdraw."),
+    BCH =         c('BCH', Inf,  3.,  0.,      0., FALSE, "No external transfers. You can buy, sell and trade it, but transfers into and out of BlockFi aren’t supported. Convert to another crypto to withdraw."),
     
     BAT1 =        c('BAT', 4000, 1.,   60.,     2000000., FALSE, NA),
     BAT2 =        c('BAT', 20000,.2,   60.,     2000000., FALSE, NA),
@@ -470,7 +543,7 @@ getBlockFiData <- function(platform = "BlockFi") {
   blockfi_data[, (changeCols) := lapply(.SD, as.numeric), .SDcols = changeCols]
   blockfi_data[, one_free := as.logical(one_free)]
   blockfi_stable_rates = data.table(amount_upper = c(20000, 5000000, Inf),
-                                    apy = c(7.25, 6., 4.5),
+                                    apy = c(7., 5., 4.),
                                     fee = 50.,
                                     limit = 1000000.,
                                     one_free = TRUE,
@@ -498,7 +571,6 @@ getBlockFiData <- function(platform = "BlockFi") {
 # Fees: https://crypto.com/exchange/document/fees-limits
 # Rates on Crypto.com assuming $0 CRO Stake and 3-month Term
 getCryptoComData <- function(platform = "Crypto.com") {
-  
   pltf = platform
   
   cryptocom_data = transpose(data.table(
@@ -549,7 +621,6 @@ getCryptoComData <- function(platform = "Crypto.com") {
 # Celsius data
 # https://celsius.network/rates
 getCelsiusData <- function(platform = "Celsius") {
-  
   pltf = platform
   
   celsius_data = transpose(data.table(
@@ -603,7 +674,6 @@ getCelsiusData <- function(platform = "Celsius") {
 # Gemini data
 # https://exchange.gemini.com/earn
 getGeminiData <- function(platform = "Gemini") {
-  
   pltf = platform
   
   gemini_data = transpose(data.table(
@@ -646,7 +716,6 @@ getGeminiData <- function(platform = "Gemini") {
 # Coinbase data
 # https://www.coinbase.com/trade/asset-categories/interest_earning
 getCoinbaseData <- function(platform = "Coinbase") {
-  
   pltf = platform
   
   coinbase_data = transpose(data.table(
@@ -676,12 +745,44 @@ getCoinbaseData <- function(platform = "Coinbase") {
 }
 
 
+# AQRU Data
+# https://aqru.io/earn-interest-bitcoin/
+getAQRUData <- function(platform = "AQRU") {
+  
+  pltf = platform
+  
+  aqru_data = transpose(data.table(
+    make.names = c("currency", "amount_upper", "apy"),
+    BTC =     c("BTC", Inf, 7.),
+    ETH =     c("ETH", Inf, 7.),
+    USDT =    c("USDT", Inf, 12.),
+    USDC =    c("USDC", Inf, 12.),
+    DAI =     c("DAI", Inf, 12.)
+  ), make.names = "make.names")
+  changeCols = c("amount_upper", "apy")
+  aqru_data[, (changeCols):= lapply(.SD, as.numeric), .SDcols = changeCols]
+  aqru_data[, amount_lower := shift(amount_upper, 1, fill=0), by=currency]
+  setcolorder(aqru_data, c('currency', 'amount_lower', 'amount_upper', 'apy'))
+  
+  aqru_penalties = data.table(currency = unique(aqru_data$currency),
+                              limit = NA,
+                              fee = 0.,
+                              one_free = NA,
+                              term = NA,
+                              note = NA,
+                              period = NA)
+  
+  return(makePlatformData(platform, aqru_data, aqru_penalties))
+}
+
+
 # Crypto Platforms
 g_crypto_platforms <- list(BlockFi=getBlockFiData, 
                            Crypto.com = getCryptoComData, 
                            Celsius = getCelsiusData,
                            Coinbase = getCoinbaseData,
-                           Gemini = getGeminiData
+                           Gemini = getGeminiData,
+                           AQRU = getAQRUData
                            #, "Voyager", "Nexo", "Vauld", "Kraken"
 )
 

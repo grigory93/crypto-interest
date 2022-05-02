@@ -33,8 +33,17 @@ about_savings = platform_data[["about"]]
 
 # Crypto API
 currencies = m_load_assets(currencies)
-platform_rates = currencies[, c('currency', 'priceUsd')][platform_rates, on='currency']
+coin_api_columns = c('currency', 'priceUsd', 'marketCapUsd', 'rank',
+                     'supply', 'maxSupply', 'changePercent24Hr')
+platform_rates = currencies[, ..coin_api_columns][platform_rates, on='currency']
 platform_refs = m_load_exchanges(platform_refs)
+
+
+makeHTML <- function(s, type) {
+  prefix = paste0("<", type, ">")
+  suffix = paste0("</", type, ">")
+  paste0(prefix, s, suffix)
+}
 
 
 makeCurrencyOptions <- function(pltf = NULL) {
@@ -113,9 +122,10 @@ computeReturn <- function(amt, pltf, cur, months, returnApy = FALSE) {
 }
 
 
-makeDisclaimers <- function(cur, limit, one_free, note) {
+makeDisclaimers <- function(cur, limit, one_free, note, forReturns=TRUE) {
   caption_notes = c(
-    "¹ Returns could be slightly inflated due to ignoring interest crossing into lower APY range (if applicable).",
+    if (forReturns)
+      "¹ Returns could be slightly inflated due to ignoring interest crossing into lower APY range (if applicable).",
     if (!is.na(cur) && !is.na(limit))
       paste(
         "²",
@@ -256,8 +266,6 @@ ui <- fluidPage(
           title = "Returns over Time",
           value = "compoundOverTime",
           icon = icon("usd", class = "about-icon", lib = "glyphicon"),
-          # icon=icon("chart-simple"),
-          # hr(),
           plotOutput("investmentPlot"),
           h5(textOutput("ratesDataHeader")),
           DT::dataTableOutput("ratesData"),
@@ -291,7 +299,19 @@ ui <- fluidPage(
           title = "Compare Assets",
           value = "compareReturnsCoins",
           icon = icon("stats", class = "about-icon", lib = "glyphicon"),
-          plotOutput("compareReturnsCoinsPlot")
+          tabsetPanel(
+            id = "compare_coins_tabset",
+            tabPanel(
+              title = "Compare APY's",
+              icon = icon("credit-card", class = "about-icon", lib = "glyphicon"),
+              plotOutput("compareReturnsCoinsPlot")
+            ),
+            tabPanel(
+              title = "Compare Market Caps",
+              icon = icon("scale", class = "about-icon", lib = "glyphicon"),
+              plotOutput("compareMarketCapCoinsPlot")
+            )
+          )
         ),
         tabPanel(
           title = "Crypto Interest Explainer",
@@ -334,19 +354,15 @@ ui <- fluidPage(
             id = "resource_tabset",
             tabPanel(
               title = uiOutput("resourePlatformTabPanelTitle"),
-              # "Platform",
               icon = icon("cloud", class = "about-icon", lib = "glyphicon"),
-              h4(textOutput("platformRefsHeader")),
-              p(textOutput("platformAbout")),
+              # h4(textOutput("platformRefsHeader")),
               DT::dataTableOutput("platformData"),
               DT::dataTableOutput("platformRefs")
             ),
             tabPanel(
               title = uiOutput("resoureCoinTabPanelTitle"),
-              # "Coin",
               icon = icon("bitcoin", class = "about-icon"),
-              #, lib = "glyphicon"),
-              h4(textOutput("currencyRefsHeader")),
+              # h4(textOutput("currencyRefsHeader")),
               DT::dataTableOutput("currencyData"),
               DT::dataTableOutput("currencyRefs")
             )
@@ -550,12 +566,6 @@ server <- function(input, output, session) {
     makeCurrencyNetwork(cur)
   })
   
-  output$platformAbout <- renderText({
-    req(input$platform)
-    pltf = input$platform
-    
-    platform_refs[platform == pltf,]$about_text
-  })
   
   output$earnCryptoHeader <- renderText({
     "Sign Up with Bonus (using referral code)"
@@ -592,41 +602,64 @@ server <- function(input, output, session) {
     
     refs = platform_refs[platform == pltf,]
     
-    rate_ref_text = paste(pltf, "rate page")
     rate_ref_url = paste0(
-      rate_ref_text,
-      ": <a href='",
+      "<a href='",
       refs$rate_ref,
       "' target='_blank'>",
       refs$rate_ref,
       "</a>"
     )
     
-    fee_ref_text = paste(pltf, "fee page")
     fee_ref_url = paste0(
-      fee_ref_text,
-      ": <a href='",
+      "<a href='",
       refs$fee_ref,
       "' target='_blank'>",
       refs$fee_ref,
       "</a>"
     )
     
-    referral_text = refs$referral_text
     referral_url = paste0(
-      referral_text,
-      ": <a href='",
+      refs$referral_text,
+      "<br><a href='",
       refs$referral_ref,
       "' target='_blank'>",
       refs$referral_ref,
       "</a>"
     )
+    
+    mission_url = paste0(
+      "<a href='",
+      refs$mission_ref,
+      "' target='_blank'>",
+      refs$mission_ref,
+      "</a>"
+    )
+    
+    about_text = refs$about_text
+    
+    about_url = paste0(
+      "<a href='",
+      refs$about_ref,
+      "' target='_blank'>",
+      refs$about_ref,
+      "</a>"
+    )
+    
+    wiki_url = paste0(
+      "<a href='",
+      refs$wiki_ref,
+      "' target='_blank'>",
+      refs$wiki_ref,
+      "</a>"
+    )
+    
+    info = refs$more_info
     
     DT::datatable(
-      data.frame(# c(rate_ref_text, fee_ref_text, referral_text)),
-        c(
-          rate_ref_url, fee_ref_url, referral_url
-        )),
+      data.frame(makeHTML(c("About", "Official website", "Wiki", "Mission", "Rates", "Fees", "Referral", "Info"),
+                          type = "strong"),
+                 c(about_text, about_url, wiki_url, mission_url, rate_ref_url, fee_ref_url, referral_url, info)
+        ),
       # caption = paste(pltf, "Platform"),
       options = c(g_DT_options,  list(dom = 't', bSort = FALSE)),
       rownames = FALSE,
@@ -676,36 +709,51 @@ server <- function(input, output, session) {
     network = refs$network
     desc = refs$desc
     whitepaper_url = paste0(
-      "Whitepaper: <a href='",
+      "<a href='",
       refs$whitepaper,
       "' target='_blank'>",
       refs$whitepaper,
       "</a>"
     )
     website_url = paste0(
-      "Official website: <a href='",
+      "<a href='",
       refs$website,
       "' target='_blank'>",
       refs$website,
       "</a>"
     )
     explorer_url = paste0(
-      "Blockchain explorer: <a href='",
+      "<a href='",
       refs$explorer,
       "' target='_blank'>",
       refs$explorer,
       "</a>"
     )
+    parent_url = paste0(
+      "<a href='",
+      refs$parent,
+      "' target='_blank'>",
+      refs$parent,
+      "</a>"
+    )
+    wiki_url = paste0(
+      "<a href='",
+      refs$wikipedia,
+      "' target='_blank'>",
+      refs$wikipedia,
+      "</a>"
+    )
     
     DT::datatable(
-      data.frame(c(desc, whitepaper_url, website_url, explorer_url)),
+      data.frame(makeHTML(c("About", "Whitepaper", "Official website", "Wiki", "Parent or founder", "Blockchain explorer"),
+                          type="strong"),
+                 c(desc, whitepaper_url, website_url, wiki_url, parent_url, explorer_url)),
       # caption = makeCurrencyNetwork(cur),
       options = c(g_DT_options,  list(dom = 't', bSort = FALSE)),
       rownames = FALSE,
       colnames = "",
       escape = FALSE
     )
-    
   })
   
   
@@ -1114,7 +1162,7 @@ server <- function(input, output, session) {
       scale_y_continuous(labels = scales::percent) +
       scale_fill_manual(palette = getTableauPalette(length(unique(df$currency)))) +
       labs(
-        title = paste(pltf, "APY's by Assets"),
+        title = paste(pltf, "Coins by APY"),
         # subtitle = paste0("Interest earned on ",amount," ",cur," after ",months," months"),
         x = NULL,
         y = NULL,
@@ -1133,7 +1181,45 @@ server <- function(input, output, session) {
     return(p)
     
   })
+  
+  
+  output$compareMarketCapCoinsPlot <- renderPlot({
+    req(input$platform)
+    pltf = input$platform
+    
+    df = platform_rates[platform == pltf,]
+    df = df[df[, .I[apy == max(apy)], by = currency]$V1]
+    
+    caption_notes = makeDisclaimers(NA, NA, NA, NA, forReturns = FALSE)
+    caption_text = paste(caption_notes, collapse = '\n')
+    
+    p = ggplot(data = df, aes(reorder(currency,-marketCapUsd), marketCapUsd, fill =
+                                currency)) +
+      geom_bar(stat = 'identity') +
+      scale_y_continuous(labels = scales::dollar_format()) +
+      scale_fill_manual(palette = getTableauPalette(length(unique(df$currency)))) +
+      labs(
+        title = paste(pltf, "Coins by Market Cap"),
+        x = NULL,
+        y = NULL,
+        caption = caption_text
+      ) +
+      theme_tufte(ticks = FALSE, base_size = 16) +
+      theme(
+        legend.position = "none",
+        plot.caption = element_text(
+          color = "black",
+          face = "italic",
+          size = 10
+        )
+      )
+    
+    return(p)
+  })
 }
+
+
+
 
 
 # TODO - image rendering
