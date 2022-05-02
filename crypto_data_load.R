@@ -160,6 +160,16 @@ g_currencies = rbindlist(list(
        parent="https://en.wikipedia.org/wiki/Satoshi_Nakamoto",
        wikipedia="https://en.wikipedia.org/wiki/Bitcoin",
        type="currency"),
+  list(currency='WBTC',
+       currency_join='WBTC',
+       network='Wrapped Bitcoin',
+       desc="Wrapped Bitcoin (WBTC) is an Ethereum token that is intended to represent Bitcoin (BTC) on the Ethereum blockchain. It is not Bitcoin, but rather a separate ERC-20 token that’s designed to track Bitcoin’s value. WBTC was created to allow Bitcoin holders to participate in decentralized finance (“DeFi”) apps that are popular on Ethereum. Through a WBTC partner, 1 Bitcoin can be exchanged for 1 Wrapped Bitcoin, and vice-versa.",
+       max_value=0.5,
+       whitepaper="https://wbtc.network/assets/wrapped-tokens-whitepaper.pdf",
+       website="https://www.wbtc.network/",
+       parent="https://github.com/WrappedBTC/DAO",
+       wikipedia="https://dyor-crypto.fandom.com/wiki/Wrapped_Bitcoin_(WBTC)",
+       type="currency"),
   list(currency='ETH',
        currency_join = 'ETH',
        network='Ethereum',
@@ -472,7 +482,19 @@ g_refs = rbindlist(list(
        about_text="AQRU is a simple app that helps you to buy, invest and earn interest on your Crypto assets. Your annual interest is paid daily and tracked to the second.",
        mission_ref="https://aqru.io/insights/aqru-launches-an-app-to-help-everyone-earn-interest-on-their-crypto/",
        logo=NA,
-       more_info="Not yet available in United States.<br>No fees on buying Crypto. Withdraw your returns anytime and receive funds within 24 hours in either fiat or Crypto. No fees on Fiat withdrawals.<br>Customers can make deposits via bank transfer, credit card, or transfer Crypto. No fees on Bank Transfer or Crypto Transfers.")
+       more_info="Not yet available in United States.<br>No fees on buying Crypto. Withdraw your returns anytime and receive funds within 24 hours in either fiat or Crypto. No fees on Fiat withdrawals.<br>Customers can make deposits via bank transfer, credit card, or transfer Crypto. No fees on Bank Transfer or Crypto Transfers."),
+  list(platform="Hodlnaut",
+       exchangeId=NA,
+       rate_ref="https://www.hodlnaut.com/rates",
+       fee_ref="https://www.hodlnaut.com/fees",
+       referral_ref="",
+       referral_text="",
+       about_ref="https://www.hodlnaut.com/company",
+       wiki_ref="https://wikitia.com/wiki/Hodlnaut",
+       about_text="Hodlnaut is the leading Crypto Borrowing and Lending Platform based in Singapore whose mission is to provide financial services to cryptocurrency users. The platform currently has over $500 Million USD of Digital Assets under Management and is growing at an average of 20% month on month.",
+       mission_ref="https://www.hodlnaut.com/why-trust-hodlnaut",
+       logo=NA,
+       more_info="We currently offer one free withdrawal per calendar month.<br>Subsequent withdrawals will be charged with fees as listed below.<br>Withdrawal fees are regularly adjusted according to blockchain conditions.")
 ))
 
 
@@ -776,13 +798,74 @@ getAQRUData <- function(platform = "AQRU") {
 }
 
 
+# Hodlnaut data
+# [Hodlnaut web site](https://www.hodlnaut.com/rates) and 
+# [Hodlnaut Fees](https://www.hodlnaut.com/fees):
+getHodlnautData <- function(platform = "Hodlnaut") {
+  pltf = platform
+  
+  hodlnaut_data = transpose(data.table(
+    make.names = c("currency", "amount_upper", "apy", "fee", "limit", "one_free", "note"),
+    BTC1 =        c('BTC', 1.,  5.33,  0.0004, NA, TRUE, NA),
+    BTC2 =        c('BTC', 1.5, 5.02,  0.0004, NA, TRUE, NA),
+    BTC3 =        c('BTC', 2.,  1.51,  0.0004, NA, TRUE, NA),
+    BTC4 =        c('BTC', Inf,  1.,   0.0004, NA, TRUE, NA),
+    
+    WBTC1 =       c('WBTC', 1.,  5.33,  0.0004, NA, TRUE, NA),
+    WBTC2 =       c('WBTC', 1.5, 5.02,  0.0004, NA, TRUE, NA),
+    WBTC3 =       c('WBTC', 2.,  1.51,  0.0004, NA, TRUE, NA),
+    WBTC4 =       c('WBTC', Inf,  1.,   0.0004, NA, TRUE, NA),
+    
+    ETH1 =        c('ETH', 30.,   5.44,  0.0036, NA, TRUE, NA),
+    ETH2 =        c('ETH', 100.,  4.08,  0.0036, NA, TRUE, NA),
+    ETH3 =        c('ETH', Inf,   3.04,  0.0036, NA, TRUE, NA),
+    
+    USDC1 =        c('USDC', 100000., 9.41, 10., NA, TRUE, NA),
+    USDC2 =        c('USDC', 500000., 3.04, 10., NA, TRUE, NA),
+    USDC3 =        c('USDC', 1000000.,.5,   10., NA, TRUE, NA),
+    USDC4 =        c('USDC', Inf,     .1,   10., NA, TRUE, NA),
+    
+    USDT1 =        c('USDT', 100000., 9.41, 10., NA, TRUE, NA),
+    USDT2 =        c('USDT', 500000., 3.04, 10., NA, TRUE, NA),
+    USDT3 =        c('USDT', 1000000.,.5,   10., NA, TRUE, NA),
+    USDT4 =        c('USDT', Inf,     .1,   10., NA, TRUE, NA),
+    
+    DAI1 =         c('DAI', 25000.,  8.32,  10.,   NA, TRUE, NA),
+    DAI2 =         c('DAI', 100000., 5.12,  10.,   NA, TRUE, NA),
+    DAI3 =         c('DAI', 500000., 3.04,  10.,   NA, TRUE, NA),
+    DAI4 =         c('DAI', Inf,     .1,    10.,   NA, TRUE, NA),
+    
+    UST =         c('UST', Inf,  13.86,  30.,   NA, TRUE,  NA),
+    
+    LUNA =        c('LUNA', Inf,  6.71,  0.5,   NA, TRUE,  NA)),
+    make.names = "make.names")
+  changeCols = c("amount_upper", "apy", "fee", "limit")
+  hodlnaut_data[, (changeCols) := lapply(.SD, as.numeric), .SDcols = changeCols]
+  hodlnaut_data[, one_free := as.logical(one_free)]
+  
+  hodlnaut_data[, amount_lower := shift(amount_upper, 1, fill=0), by=currency]
+  
+  hodlnaut_rates = cbind(data.table(platform=pltf),
+                        hodlnaut_data[, c('currency', 'amount_lower', 'amount_upper', 'apy')])
+  
+  hodlnaut_penalities_data = hodlnaut_data[, .SD[1, c('limit', 'fee', 'one_free', 'note')], by=currency]
+  hodlnaut_penalities_data[, `:=` (term = NA, period = "30-day")]
+  hodlnaut_penalties = cbind(data.table(platform=pltf),
+                            hodlnaut_penalities_data[, c('currency', 'limit', 'fee', 'one_free', 
+                                                         'term', 'note', 'period')])
+  
+  return(makePlatformData(platform, hodlnaut_rates, hodlnaut_penalties))
+}
+
+
 # Crypto Platforms
 g_crypto_platforms <- list(BlockFi=getBlockFiData, 
                            Crypto.com = getCryptoComData, 
                            Celsius = getCelsiusData,
                            Coinbase = getCoinbaseData,
                            Gemini = getGeminiData,
-                           AQRU = getAQRUData
+                           AQRU = getAQRUData,
+                           Hodlnaut = getHodlnautData
                            #, "Voyager", "Nexo", "Vauld", "Kraken"
 )
 
